@@ -4,7 +4,7 @@ our $VERSION = '0.087';
 
 use Statocles::Base;
 use Statocles::Util qw( dircopy derp );
-
+use Mojo::File ();
 use base qw( Exporter );
 our @EXPORT_OK = qw(
     test_constructor test_pages build_test_site build_test_site_apps
@@ -31,12 +31,12 @@ sub build_test_site {
 
     my $store   = $site_args{build_store}
                 ? Statocles::Store->new( delete $site_args{build_store} )
-                : Path::Tiny->tempdir
+                : Mojo::File::tempdir
                 ;
 
     my $deploy  = $site_args{deploy}
                 ? Statocles::Deploy::File->new( delete $site_args{deploy} )
-                : Path::Tiny->tempdir
+                : Mojo::File::tempdir
                 ;
 
     # Give a testable logger by default, but only if we haven't asked
@@ -68,8 +68,8 @@ deploy dir.
 sub build_test_site_apps {
     my ( $share_dir, %site_args ) = @_;
 
-    my $build_dir = Path::Tiny->tempdir;
-    my $deploy_dir = Path::Tiny->tempdir;
+    my $build_dir = Mojo::File::tempdir;
+    my $deploy_dir = Mojo::File::tempdir;
 
     $site_args{build_store}{path} = $build_dir;
     $site_args{deploy}{path} = $deploy_dir;
@@ -215,8 +215,8 @@ sub test_pages {
                 $output = do { local $/; <$output> };
             }
             # Handle Path::Tiny from render
-            elsif ( Scalar::Util::blessed( $output ) && $output->isa( 'Path::Tiny' ) ) {
-                $output = $output->slurp_raw;
+            elsif ( Scalar::Util::blessed( $output ) && $output->isa( 'Mojo::File' ) ) {
+                $output = $output->slurp;
             }
         }
 
@@ -250,13 +250,13 @@ temporary directories
 sub build_temp_site {
     my ( $share_dir ) = @_;
 
-    my $tmp = Path::Tiny->tempdir;
+    my $tmp = Mojo::File::tempdir;
     dircopy $share_dir->child( qw( app blog ) ), $tmp->child( 'blog' );
     dircopy $share_dir->child( 'theme' ), $tmp->child( 'theme' );
-    $tmp->child( 'build_site' )->mkpath;
-    $tmp->child( 'deploy_site' )->mkpath;
-    $tmp->child( 'build_foo' )->mkpath;
-    $tmp->child( 'deploy_foo' )->mkpath;
+    $tmp->child( 'build_site' )->make_path;
+    $tmp->child( 'deploy_site' )->make_path;
+    $tmp->child( 'build_foo' )->make_path;
+    $tmp->child( 'deploy_foo' )->make_path;
 
     my $config = {
         theme => {
@@ -362,4 +362,3 @@ __END__
 =head1 DESCRIPTION
 
 This module provides some common test routines for Statocles tests.
-
