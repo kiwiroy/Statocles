@@ -117,7 +117,10 @@ subtest 'base URL with folder rewrites content' => sub {
             base_url => 'http://example.com/deploy/',
         },
     );
-
+    $build_dir = Mojo::File->new( "$build_dir" );
+    $deploy_dir = Mojo::File->new( "$deploy_dir" );
+    diag "$build_dir does not exist" unless -e $build_dir;
+    diag "$deploy_dir does not exist" unless -e $deploy_dir;
     subtest 'build' => sub {
         $site->build;
 
