@@ -20,7 +20,7 @@ has content => (
     lazy => 1,
     default => sub {
         my ( $self ) = @_;
-        return Path::Tiny->new( $self->path )->slurp;
+        return Mojo::File->new( $self->path )->slurp;
     },
 );
 
@@ -216,7 +216,7 @@ sub include {
         $render = 0;
         shift @path;
     }
-    my $path = Path::Tiny->new( @path );
+    my $path = Mojo::File->new( @path );
 
     my @stores = @{ $self->include_stores };
     for my $store ( @{ $self->include_stores } ) {

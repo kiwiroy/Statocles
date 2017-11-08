@@ -16,14 +16,16 @@ our @IMPORT_MODULES = (
     strict => [],
     warnings => [],
     feature => [qw( :5.10 )],
-    'Path::Tiny' => [qw( rootdir cwd )],
+#    'Path::Tiny' => [qw( rootdir cwd )],
+    'Cwd' => [qw{cwd}],
+    'Mojo::File',
     'DateTime::Moonpig',
     'Statocles',
 );
 
 my @class_modules = (
     'Types::Standard' => [qw( :all )],
-    'Types::Path::Tiny' => [qw( Path AbsPath Dir )],
+#    'Types::Path::Tiny' => [qw( Path AbsPath Dir )],
     'Statocles::Types' => [qw( :all )],
 );
 
@@ -32,7 +34,9 @@ our %IMPORT_BUNDLES = (
         sub { warn 'Bundle Test deprecated and will be removed in v1.000, do not use'; return },
         qw( Test::More Test::Deep Test::Differences Test::Exception ),
         'Dir::Self' => [qw( __DIR__ )],
-        'Path::Tiny' => [qw( path tempdir cwd )],
+#        'Path::Tiny' => [qw( path tempdir cwd )],
+        'Mojo::File' => [qw( path tempdir )],
+        'Cwd' => [qw{cwd}],
         'Statocles::Test' => [qw(
             test_constructor test_pages build_test_site build_test_site_apps
             build_temp_site

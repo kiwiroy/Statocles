@@ -23,7 +23,7 @@ has inc => (
     default => sub { [ @INC ] },
     coerce => sub {
         my ( $args ) = @_;
-        return [ map { Path::Tiny->new( $_ ) } @$args ];
+        return [ map { Mojo::File->new( $_ ) } @$args ];
     },
 );
 
@@ -111,7 +111,7 @@ sub pages {
         # Also check for exact matches, for strange extensions
         for my $dir ( @dirs ) {
             my @glob_parts = split /::/, $glob;
-            my $path = Path::Tiny->new( $dir, @glob_parts );
+            my $path = Mojo::File->new( $dir, @glob_parts );
             if ( $path->is_file ) {
                 $modules{ $glob } = "$path";
             }
@@ -132,7 +132,7 @@ sub pages {
         # Weave the POD before trying to make HTML
         my $pod = $self->weave
                 ? $self->_weave_module( $path )
-                : Path::Tiny->new( $path )->slurp
+                : Mojo::File->new( $path )->slurp
                 ;
 
         my $parser = Pod::Simple::XHTML->new;
@@ -205,7 +205,7 @@ sub pages {
             layout => $self->template( 'layout.html' ),
             template => $self->template( 'source.html' ),
             title => "$module (source)",
-            content => Path::Tiny->new( $path )->slurp,
+            content => Mojo::File->new( $path )->slurp,
             app => $self,
             data => {
                 doc_path => $self->url( $page_args{path} ),
@@ -224,7 +224,7 @@ sub _module_href {
         return '/index.html';
     }
 
-    my $page_url = "$module/index.html";
+    my $page_url = "${module}/index.html";
     $page_url =~ s{::}{/}g;
     return $page_url;
 }
@@ -269,7 +269,7 @@ sub _weave_module {
             $self->weave_config->parent;
     }
 
-    my $perl_utf8 = Encode::encode( 'utf-8', Path::Tiny->new( $path )->slurp, Encode::FB_CROAK );
+    my $perl_utf8 = Encode::encode( 'utf-8', Mojo::File->new( $path )->slurp, Encode::FB_CROAK );
     my $ppi_document = PPI::Document->new( \$perl_utf8 ) or die PPI::Document->errstr;
 
     ### Copy/paste from Pod::Elemental::PerlMunger

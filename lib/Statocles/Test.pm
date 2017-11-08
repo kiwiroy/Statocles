@@ -31,12 +31,12 @@ sub build_test_site {
 
     my $store   = $site_args{build_store}
                 ? Statocles::Store->new( delete $site_args{build_store} )
-                : Mojo::File::tempdir
+                : Mojo::File::tempdir('build_test_site.build_store.XXXXX', TMPDIR => 1)
                 ;
 
     my $deploy  = $site_args{deploy}
                 ? Statocles::Deploy::File->new( delete $site_args{deploy} )
-                : Mojo::File::tempdir
+                : Mojo::File::tempdir('build_test_site.deploy.XXXXX')
                 ;
 
     # Give a testable logger by default, but only if we haven't asked
@@ -68,11 +68,11 @@ deploy dir.
 sub build_test_site_apps {
     my ( $share_dir, %site_args ) = @_;
 
-    my $build_dir = Mojo::File::tempdir;
-    my $deploy_dir = Mojo::File::tempdir;
+    my $build_dir = Mojo::File::tempdir('build_test_site_apps.build_dir.XXXXX');
+    my $deploy_dir = Mojo::File::tempdir('build_test_site_apps.deploy_dir.XXXXX');
 
-    $site_args{build_store}{path} = $build_dir;
-    $site_args{deploy}{path} = $deploy_dir;
+    $site_args{build_store}{path} = "$build_dir";
+    $site_args{deploy}{path} = "$deploy_dir";
 
     if ( !$site_args{apps} ) {
         require Statocles::App::Blog;
@@ -250,7 +250,7 @@ temporary directories
 sub build_temp_site {
     my ( $share_dir ) = @_;
 
-    my $tmp = Mojo::File::tempdir;
+    my $tmp = Mojo::File::tempdir('build_temp_site.XXXXX');
     dircopy $share_dir->child( qw( app blog ) ), $tmp->child( 'blog' );
     dircopy $share_dir->child( 'theme' ), $tmp->child( 'theme' );
     $tmp->child( 'build_site' )->make_path;

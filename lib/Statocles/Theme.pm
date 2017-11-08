@@ -92,7 +92,7 @@ around BUILDARGS => sub {
     my $args = $self->$orig( @args );
     if ( $args->{store} && !ref $args->{store} && $args->{store} =~ /^::/ ) {
         my $name = substr $args->{store}, 2;
-        $args->{store} = Path::Tiny->new( dist_dir( 'Statocles' ) )->child( 'theme', $name );
+        $args->{store} = Mojo::File->new( dist_dir( 'Statocles' ) )->child( 'theme', $name );
     }
     return $args;
 };
@@ -112,7 +112,8 @@ sub read {
 
     my $content = eval { $self->store->read_file( $path ); };
     if ( $@ ) {
-        if ( blessed $@ && $@->isa( 'Path::Tiny::Error' ) && $@->{op} =~ /^open/ ) {
+        #if ( blessed $@ && $@->isa( 'Path::Tiny::Error' ) && $@->{op} =~ /^open/ ) {
+        if ( blessed $@ && $@->{op} =~ /^open/ ) {
             die sprintf 'ERROR: Template "%s" does not exist in theme directory "%s"' . "\n",
                 $path, $self->store->path;
         }
@@ -154,7 +155,7 @@ given C<path_parts>.
 
 sub template {
     my ( $self, @path ) = @_;
-    my $path = Path::Tiny->new( @path );
+    my $path = Mojo::File->new( @path );
     return $self->_templates->{ $path } ||= $self->read( $path );
 }
 
@@ -179,7 +180,7 @@ sub include {
         $render = 0;
         shift @path;
     }
-    my $path = Path::Tiny->new( @path );
+    my $path = Mojo::File->new( @path );
 
     my @stores = ( @{ $self->include_stores }, $self->store );
     for my $store ( @stores ) {

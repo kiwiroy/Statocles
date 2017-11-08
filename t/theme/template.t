@@ -4,7 +4,7 @@ use Statocles::Theme;
 use Statocles::Template;
 use Cwd qw( getcwd );
 use Scalar::Util qw( refaddr );
-my $SHARE_DIR = path( __DIR__, '..', 'share' );
+my $SHARE_DIR = Mojo::File::path( __DIR__, '..', 'share' );
 build_test_site( theme => $SHARE_DIR->child( 'theme' ) );
 
 subtest 'attributes' => sub {
@@ -98,7 +98,7 @@ subtest 'templates from directory' => sub {
             subtest $tmpl => sub {
                 cmp_deeply $theme->template( split m{/}, $tmpl ), $exp_templates{ $tmpl }, 'array of path parts';
                 cmp_deeply $theme->template( $tmpl ), $exp_templates{ $tmpl }, 'path with slashes';
-                cmp_deeply $theme->template( Path::Tiny->new( split m{/}, $tmpl ) ), $exp_templates{ $tmpl }, 'Path::Tiny object';
+                cmp_deeply $theme->template( Mojo::File->new( split m{/}, $tmpl ) ), $exp_templates{ $tmpl }, 'Path::Tiny object';
             };
         }
     };
@@ -108,11 +108,11 @@ subtest 'templates from directory' => sub {
         chdir $SHARE_DIR;
 
         my $store = Statocles::Store->new(
-            path => 'theme',
+            path => Mojo::File->new('theme')->to_abs,
         );
 
         my $theme = Statocles::Theme->new(
-            store => 'theme',
+            store => $store,
         );
         my %exp_templates = read_templates( $store, $theme );
 
@@ -120,7 +120,7 @@ subtest 'templates from directory' => sub {
             subtest $tmpl => sub {
                 cmp_deeply $theme->template( split m{/}, $tmpl ), $exp_templates{ $tmpl }, 'array of path parts';
                 cmp_deeply $theme->template( $tmpl ), $exp_templates{ $tmpl }, 'path with slashes';
-                cmp_deeply $theme->template( Path::Tiny->new( split m{/}, $tmpl ) ), $exp_templates{ $tmpl }, 'Path::Tiny object';
+                cmp_deeply $theme->template( Mojo::File->new( split m{/}, $tmpl ) ), $exp_templates{ $tmpl }, 'Path::Tiny object';
             };
         }
 

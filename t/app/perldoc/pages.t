@@ -3,13 +3,13 @@ use Test::Lib;
 use My::Test;
 use Statocles::App::Perldoc;
 
-my $SHARE_DIR = path( __DIR__ )->parent->parent->child( 'share' );
+my $SHARE_DIR = Mojo::File::path( __DIR__ )->parent->parent->child( 'share' );
 my $site = build_test_site(
     theme => $SHARE_DIR->child( 'theme' ),
 );
 
 my @page_tests = (
-    '/pod/index.html' => sub {
+    '/pod//index.html' => sub {
         my ( $html, $dom ) = @_;
         my $node;
 

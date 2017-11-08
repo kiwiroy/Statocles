@@ -44,7 +44,7 @@ sub command {
 
     if ( $argv[0] eq 'edit' ) {
         $argv[1] =~ s{^/}{};
-        my $path = Path::Tiny->new(
+        my $path = Mojo::File->new(
             $argv[1] =~ /[.](?:markdown|md)$/ ? $argv[1] : "$argv[1]/index.markdown",
         );
 
@@ -101,4 +101,3 @@ __END__
 
 This application builds basic pages based on L<Markdown documents|Statocles::Document> and
 other files. Use this to have basic informational pages like "About Us" and "Contact Us".
-

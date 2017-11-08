@@ -10,7 +10,7 @@ my $site = build_test_site(
 );
 
 # We need an app we can edit
-my $tmpdir = tempdir;
+my $tmpdir = Mojo::File::tempdir;
 $tmpdir->child( 'basic' )->mkpath;
 
 my $app = Statocles::App::Basic->new(

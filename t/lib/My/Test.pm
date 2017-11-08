@@ -6,6 +6,40 @@ use strict;
 use warnings;
 
 use base 'Import::Base';
+use Mojo::Util qw{monkey_patch};
+use Mojo::Exception;
+
+monkey_patch 'Mojo::File',
+  parent => sub { shift->dirname; },
+  mkpath => sub { shift->make_path },
+  is_dir => sub { -d "$_[0]" },
+  is_file => sub { -f "$_[0]" },
+  is_absolute => sub { shift->is_abs },
+  exists => sub { -e "$_[0]" },
+  touchpath => sub { shift->make_path },
+  spew_utf8 => sub { shift->spurt(@_) },
+  spew => sub { shift->spurt(@_) },
+  slurp_utf8 => sub {
+    my $self = shift;
+    my $res = eval { $self->slurp };
+    if ($@) {
+      my $e = Mojo::Exception->new($@)->inspect;
+      $e->{op} = 'open';
+      die $e;
+    }
+    return $res;
+  },
+  absolute => sub { shift->to_abs() },
+  is_rootdir => sub { shift->splitdir },
+  relative => sub { shift->to_rel(@_) },
+  stringify => sub { shift->to_string; },
+  cwd => sub { Mojo::File->new('.')->to_abs },
+  iterator => sub {
+    my @all = @{shift->list_tree(@_)};
+    sub {
+      return shift @all;
+    }
+  };
 
 our @IMPORT_MODULES = (
     sub {
@@ -17,12 +51,14 @@ our @IMPORT_MODULES = (
     strict => [],
     warnings => [],
     feature => [qw( :5.10 )],
-    'Path::Tiny' => [qw( rootdir cwd )],
+#    'Path::Tiny' => [qw( rootdir cwd )],
     'DateTime::Moonpig',
     'Statocles',
     qw( Test::More Test::Deep Test::Differences Test::Exception ),
     'Dir::Self' => [qw( __DIR__ )],
-    'Path::Tiny' => [qw( path tempdir cwd )],
+#    'Path::Tiny' => [qw( path tempdir cwd )],
+    'Mojo::File' => [qw{path tempdir}],
+    'Cwd' => ['cwd'],
     'Statocles::Test' => [qw(
       build_test_site build_test_site_apps
       build_temp_site

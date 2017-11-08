@@ -232,7 +232,7 @@ ENDHELP
         );
 
         my $slug = $self->make_slug( $doc{title} || "new post" );
-        my $path = Path::Tiny->new( @date_parts, $slug, "index.markdown" );
+        my $path = Mojo::File->new( @date_parts, $slug, "index.markdown" );
         $self->store->write_document( $path => \%doc );
         my $full_path = $self->store->path->child( $path );
 
@@ -242,7 +242,7 @@ ENDHELP
             if ( $doc{title} ne $old_title ) {
                 $self->store->path->child( $path->parent )->remove_tree;
                 $slug = $self->make_slug( $doc{title} || "new post" );
-                $path = Path::Tiny->new( @date_parts, $slug, "index.markdown" );
+                $path = Mojo::File->new( @date_parts, $slug, "index.markdown" );
                 $self->store->write_document( $path => \%doc );
                 $full_path = $self->store->path->child( $path );
             }
@@ -757,4 +757,3 @@ The post author
 =item L<Statocles::App>
 
 =back
-

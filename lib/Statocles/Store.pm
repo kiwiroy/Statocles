@@ -74,7 +74,7 @@ has _realpath => (
     is => 'ro',
     isa => Path,
     lazy => 1,
-    default => sub { $_[0]->path->realpath },
+    default => sub { $_[0]->path->to_abs },
 );
 
 # If true, we've already checked if this store's path exists. We need to
@@ -91,7 +91,7 @@ has _check_exists => (
     lazy => 1,
     default => sub {
         my ( $self ) = @_;
-        if ( !$self->path->exists ) {
+        if ( ! -e $self->path ) {
             site->log->warn( sprintf qq{Store path "%s" does not exist}, $self->path );
         }
         return 1;
@@ -484,6 +484,5 @@ on the bottom, like so:
     author: preaction
     ---
     # This is the markdown content
-    
-    This is a paragraph
 
+    This is a paragraph

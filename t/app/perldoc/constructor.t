@@ -18,9 +18,9 @@ test_constructor(
     "Statocles::App::Perldoc",
     required => \%required,
     default => {
-        inc => [ map { Path::Tiny->new( $_ ) } @INC ],
+        inc => [ map { Mojo::File->new( $_ ) } @INC ],
         weave => 0,
-        weave_config => Path::Tiny->new( './weaver.ini' ),
+        weave_config => Mojo::File->new( './weaver.ini' ),
     },
 );
 
@@ -36,7 +36,7 @@ subtest 'attribute types/coercions' => sub {
                 )
             };
 
-            cmp_deeply $app->inc, array_each( isa( 'Path::Tiny' ) );
+            cmp_deeply $app->inc, array_each( isa( 'Mojo::File' ) );
             is $app->inc->[0]->stringify, "test";
             is $app->inc->[1]->stringify, "two";
         };
@@ -46,11 +46,11 @@ subtest 'attribute types/coercions' => sub {
             lives_ok {
                 $app = Statocles::App::Perldoc->new(
                     %required,
-                    inc => [ 'test', Path::Tiny->new( 'two' ) ],
+                    inc => [ 'test', Mojo::File->new( 'two' ) ],
                 )
             };
 
-            cmp_deeply $app->inc, array_each( isa( 'Path::Tiny' ) );
+            cmp_deeply $app->inc, array_each( isa( 'Mojo::File' ) );
             is $app->inc->[0]->stringify, "test";
             is $app->inc->[1]->stringify, "two";
         };
@@ -66,7 +66,7 @@ subtest 'attribute types/coercions' => sub {
                 );
             };
 
-            isa_ok $app->weave_config, 'Path::Tiny';
+            isa_ok $app->weave_config, 'Mojo::File';
             is $app->weave_config->stringify, 'foo';
         };
     };

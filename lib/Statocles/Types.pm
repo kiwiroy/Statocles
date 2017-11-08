@@ -8,19 +8,44 @@ use feature qw( :5.10 );
 use Type::Library -base, -declare => qw(
     Store Theme Link LinkArray LinkHash LinkTree LinkTreeArray
     DateTimeObj DateStr DateTimeStr
-    Person
+    Person Path AbsPath Dir
 );
 use Type::Utils -all;
 use Types::Standard -types;
 use DateTime::Moonpig;
+use Types::TypeTiny 0.004 StringLike => { -as => "Stringable" };
+
+class_type Path, { class => "Mojo::File" };
+declare AbsPath,
+    as Path, where { $_->to_abs },
+    inline_as { $_[0]->parent->inline_check($_) . "&& ${_}->is_abs" },
+    message {
+        is_Path($_) ? "Path '$_' is not absolute" : Path->get_message($_);
+    };
+
+declare Dir,
+    as Path, where { -d $_ },
+    inline_as { $_[0]->parent->inline_check($_) . "&& (-d $_)" },
+    message {
+        is_Path($_) ? "Directory '$_' does not exist" : Path->get_message($_);
+    };
+coerce(
+        Path,
+        from Str()        => q{ Mojo::File::path($_) },
+        from Stringable() => q{ Mojo::File::path($_) },
+        from ArrayRef()   => q{ Mojo::File::path(@$_) },
+        from InstanceOf['Path::Tiny'] => q{ Mojo::File::path($_->stringify) },
+    );
 
 role_type Store, { role => "Statocles::Store" };
 coerce Store, from Str, via { Statocles::Store->new( path => $_ ) };
 coerce Store, from InstanceOf['Path::Tiny'], via { Statocles::Store->new( path => $_ ) };
+coerce Store, from InstanceOf['Mojo::File'], via { Statocles::Store->new( path => $_ ) };
 
 class_type Theme, { class => "Statocles::Theme" };
 coerce Theme, from Str, via { require Statocles::Theme; Statocles::Theme->new( store => $_ ) };
 coerce Theme, from InstanceOf['Path::Tiny'], via { require Statocles::Theme; Statocles::Theme->new( store => $_ ) };
+coerce Theme, from InstanceOf['Mojo::File'], via { require Statocles::Theme; Statocles::Theme->new( store => $_ ) };
 
 class_type Link, { class => "Statocles::Link" };
 coerce Link, from HashRef, via { Statocles::Link->new( $_ ) };
@@ -176,4 +201,3 @@ This can be coerced from any HashRef of ArrayRef of HashRefs.
 
 A L<DateTime::Moonpig> object representing a date/time. This can be coerced from a
 C<YYYY-MM-DD> string or a C<YYYY-MM-DD HH:MM:SS> string.
-
